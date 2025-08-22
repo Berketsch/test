@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Slope Equation Visualizer</title>
+	<style>
+		@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+		body {
+			font-family: 'Press Start 2P', 'Courier New', monospace;
+			background: #222;
+			color: #b366ff;
+			margin: 0;
+			padding: 0;
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			min-height: 100vh;
+		}
+		.container {
+			background: #111;
+			padding: 2rem 2.5rem;
+			border: 4px solid #b366ff;
+			box-shadow: 0 0 32px #b366ff44;
+			margin-top: 3rem;
+			width: 370px;
+			border-radius: 0;
+		}
+		h1 {
+			text-align: center;
+			color: #b366ff;
+			margin-bottom: 1.5rem;
+			text-shadow: 0 0 8px #b366ff88;
+			font-size: 1.1rem;
+		}
+		label {
+			display: block;
+			margin: 1rem 0 0.5rem 0;
+			color: #b366ff;
+			text-shadow: 0 0 4px #b366ff44;
+		}
+		input[type="number"] {
+			width: 100%;
+			padding: 0.5rem;
+			border: 2px solid #b366ff;
+			background: #222;
+			color: #b366ff;
+			font-family: inherit;
+			font-size: 1rem;
+			margin-bottom: 0.5rem;
+			border-radius: 0;
+			outline: none;
+		}
+		input[type="number"]:focus {
+			border-color: #fff200;
+			background: #111;
+			color: #fff200;
+		}
+		button {
+			width: 100%;
+			padding: 0.7rem;
+			background: #222;
+			color: #b366ff;
+			border: 2px solid #b366ff;
+			font-family: inherit;
+			font-size: 1rem;
+			cursor: pointer;
+			margin-top: 1rem;
+			border-radius: 0;
+			box-shadow: 0 0 8px #b366ff44;
+			transition: background 0.2s, color 0.2s;
+		}
+		button:hover {
+			background: #b366ff;
+			color: #222;
+		}
+		.result {
+			margin-top: 2rem;
+			text-align: center;
+		}
+		#equation {
+			font-size: 1.1rem;
+			color: #fff200;
+			text-shadow: 0 0 6px #fff20088;
+			margin-bottom: 0.5rem;
+		}
+		canvas {
+			background: #222;
+			border: 2px solid #b366ff;
+			border-radius: 0;
+			margin-top: 1rem;
+			box-shadow: 0 0 12px #b366ff44;
+		}
+	</style>
+</head>
+<body>
+	<div class="container">
+		<h1>Slope Equation Visualizer</h1>
+		<form id="slopeForm">
+			<label for="slope">Slope (m):</label>
+			<input type="number" id="slope" name="slope" step="any" required>
+			<label for="intercept">Intercept (b):</label>
+			<input type="number" id="intercept" name="intercept" step="any" required>
+			<button type="submit">Show Graph</button>
+		</form>
+		<div class="result">
+			<div id="equation" style="font-size:1.2rem;color:#3466c2;"></div>
+			<canvas id="graph" width="300" height="300"></canvas>
+		</div>
+	</div>
+	<script>
+		const form = document.getElementById('slopeForm');
+		const equationDiv = document.getElementById('equation');
+		const canvas = document.getElementById('graph');
+		const ctx = canvas.getContext('2d');
+
+		function drawGraph(m, b) {
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			// Draw axes
+			ctx.strokeStyle = '#888';
+			ctx.lineWidth = 1.5;
+			ctx.beginPath();
+			ctx.moveTo(0, canvas.height/2);
+			ctx.lineTo(canvas.width, canvas.height/2);
+			ctx.moveTo(canvas.width/2, 0);
+			ctx.lineTo(canvas.width/2, canvas.height);
+			ctx.stroke();
+
+			// Draw line y = mx + b
+			ctx.strokeStyle = '#4f8cff';
+			ctx.lineWidth = 2.5;
+			ctx.beginPath();
+			// x from -10 to 10
+			let x1 = -10, x2 = 10;
+			let y1 = m * x1 + b;
+			let y2 = m * x2 + b;
+			// Transform to canvas coordinates
+			function toCanvas(x, y) {
+				return [canvas.width/2 + x*12, canvas.height/2 - y*12];
+			}
+			let [cx1, cy1] = toCanvas(x1, y1);
+			let [cx2, cy2] = toCanvas(x2, y2);
+			ctx.moveTo(cx1, cy1);
+			ctx.lineTo(cx2, cy2);
+			ctx.stroke();
+
+			// Draw ticks
+			ctx.fillStyle = '#888';
+			ctx.font = '12px Segoe UI';
+			for (let i = -10; i <= 10; i += 5) {
+				// x-axis
+				let [tx, ty] = toCanvas(i, 0);
+				ctx.fillText(i, tx-8, canvas.height/2+16);
+				// y-axis
+				[tx, ty] = toCanvas(0, i);
+				ctx.fillText(i, canvas.width/2+8, ty+4);
+			}
+		}
+
+		form.addEventListener('submit', function(e) {
+			e.preventDefault();
+			const m = parseFloat(form.slope.value);
+			const b = parseFloat(form.intercept.value);
+			let eq = `y = ${m}x`;
+			if (b > 0) eq += ` + ${b}`;
+			else if (b < 0) eq += ` - ${Math.abs(b)}`;
+			equationDiv.textContent = eq;
+			drawGraph(m, b);
+		});
+
+		// Draw default graph
+		drawGraph(1, 0);
+		equationDiv.textContent = 'y = 1x';
+	</script>
+</body>
+</html>
